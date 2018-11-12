@@ -81,7 +81,14 @@ public class Proceso {
         this.tiempoEjecucion = tiempoEjecucion;
     }
 
-
+    public void copiarProcesoSO(Proceso proc){
+        this.pid=proc.getPid();
+        this.tamanioProceso=proc.getTamanioProceso();
+        this.tiempoEjecucion=proc.getTiempoEjecucion();
+        this.tiempoFaltane=proc.getTiempoFaltane();
+        
+        this.estado=proc.getEstado();
+    }
     
     
 }

@@ -42,7 +42,7 @@ public class TablasEnEjecucion extends javax.swing.JFrame {
             if(true){
                 dato[0]=String.valueOf(p.getOrdenEjecucion());
                 dato[1]=String.valueOf(p.getPid());
-                dato[2]=String.valueOf(p.getTiempoFaltane());
+                dato[2]=String.valueOf(p.getTiempoFaltane()+"  /   "+p.getTiempoEjecucion());
                 dato[3]=String.valueOf(p.getEstado());
                 modelo.addRow(dato);
             }

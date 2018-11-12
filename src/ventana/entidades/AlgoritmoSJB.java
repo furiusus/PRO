@@ -5,6 +5,7 @@
  */
 package ventana.entidades;
 
+import java.util.ArrayList;
 import ventana.entidades.maqueta.Algoritmo;
 
 /**
@@ -24,7 +25,21 @@ public class AlgoritmoSJB implements Algoritmo{
 
     @Override
     public void ordenarProceso(ListaProceso listaIngresada) {
-        
+        for ( Proceso proc1 : listaIngresada.getListaProceso()){
+            if(!proc1.getEstado().equals("Terminado")){
+            for(Proceso proc2 : listaIngresada.getListaProceso()){
+                if(!proc2.getEstado().equals("Terminado")){
+                boolean a = !proc1.getEstado().equals("Ejecutando") && !proc2.getEstado().equals("Ejecutando");
+                boolean b = proc1.getTiempoEjecucion()<proc2.getTiempoEjecucion();
+                if((a && b)){
+                    Proceso obj = new Proceso(proc1);
+                    proc1.copiarProcesoSO(proc2);
+                    proc2.copiarProcesoSO(obj);
+                }
+                }
+            }
+            }
+        }
     }
 
     @Override

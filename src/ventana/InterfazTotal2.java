@@ -6,6 +6,8 @@
 package ventana;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ventana.entidades.AlgoritmoFcfs;
@@ -23,11 +25,16 @@ public class InterfazTotal2 extends javax.swing.JFrame {
     private final ListaProceso listaDeProcesosFCFS = new ListaProceso();
     private final ListaProceso listaDeProcesosRR = new ListaProceso();
     private final ListaProceso listaDeProcesosSJB = new ListaProceso();
+    AlgoritmoFcfs algoritmoFcfs = new AlgoritmoFcfs();
+    AlgoritmoSJB algoritmoSJB = new AlgoritmoSJB();
+    AlgoritmoRR algoritmoRR = new AlgoritmoRR();
     private final TablasEnEjecucion tablasEnEjecucion = new TablasEnEjecucion();
     private final TablaProceso tablaProceso = new TablaProceso();
     public Thread principalFCFS=new Thread(new HiloFCFS()); 
-    
-    
+    public Thread principalSJB=new Thread(new HiloSJB());
+    public Thread principalRR=new Thread(new HiloRR());
+    private boolean anhadio = false;
+
     
     /**
      * Creates new form InterfazTotal2
@@ -37,6 +44,7 @@ public class InterfazTotal2 extends javax.swing.JFrame {
         listaDeProcesosFCFS.setListaProceso(new ArrayList<>());
         listaDeProcesosSJB.setListaProceso(new ArrayList<>());
         listaDeProcesosRR.setListaProceso(new ArrayList<>());
+  
     }
 
     /**
@@ -133,6 +141,7 @@ public class InterfazTotal2 extends javax.swing.JFrame {
 
     private void inputTiempoEjecucionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputTiempoEjecucionActionPerformed
         // TODO add your handling code here:
+
     }//GEN-LAST:event_inputTiempoEjecucionActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -158,40 +167,53 @@ public class InterfazTotal2 extends javax.swing.JFrame {
         nuevoProceso.setTamanioProceso(0d);
         nuevoProceso.setTiempoFaltane(Double.parseDouble(inputTiempoEjecucion.getText()));
         
-        AlgoritmoFcfs algoritmoFcfs = new AlgoritmoFcfs();
+        
         cantidadProcesos = algoritmoFcfs.obtenerCantidad(listaDeProcesosFCFS);
         nuevoProceso.setPid(cantidadProcesos);
         nuevoProceso.setOrdenEjecucion(cantidadProcesos);
         Proceso nuevoProceso1 =new Proceso(nuevoProceso);
         algoritmoFcfs.anadirProceso(nuevoProceso1,listaDeProcesosFCFS);
         
-        AlgoritmoSJB algoritmoSJB = new AlgoritmoSJB();
+        
         cantidadProcesos = algoritmoSJB.obtenerCantidad(listaDeProcesosSJB);
         nuevoProceso.setPid(cantidadProcesos);
         nuevoProceso.setOrdenEjecucion(cantidadProcesos);
         Proceso nuevoProceso2 =new Proceso(nuevoProceso);
         algoritmoSJB.anadirProceso(nuevoProceso2,listaDeProcesosSJB);
         
-        AlgoritmoRR algoritmoRR = new AlgoritmoRR();
+        
         cantidadProcesos = algoritmoRR.obtenerCantidad(listaDeProcesosRR);
         nuevoProceso.setPid(cantidadProcesos);
         nuevoProceso.setOrdenEjecucion(cantidadProcesos);
         Proceso nuevoProceso3 =new Proceso(nuevoProceso);
         algoritmoRR.anadirProceso(nuevoProceso3,listaDeProcesosRR);
         
-        tablasEnEjecucion.actualizarFCFS(listaDeProcesosFCFS);
-        tablasEnEjecucion.actualizarSJB(listaDeProcesosSJB);
-        tablasEnEjecucion.actualizarRR(listaDeProcesosRR);
-        
-        
+        algoritmoSJB.ordenarProceso(listaDeProcesosSJB);
+
         inputTiempoEjecucion.setText(null);
-        try {
-            if(!principalFCFS.isAlive()){
+        try{
+            boolean a = !principalFCFS.isAlive()||principalFCFS.getState().equals(Thread.State.TERMINATED);
+            boolean b = !principalSJB.isAlive()||principalSJB.getState().equals(Thread.State.TERMINATED);
+            boolean c = !principalRR.isAlive()||principalRR.getState().equals(Thread.State.TERMINATED);
+            if((a)&&(b)&&(c)){
+               principalFCFS = new Thread(new HiloFCFS());
+               System.out.println(principalFCFS.getState()+"-"+principalFCFS.isAlive());
                principalFCFS.start();
+               System.out.println(principalFCFS.getState()+"-"+principalFCFS.isAlive());
+               
+               
+               principalSJB = new Thread(new HiloSJB());
+               System.out.println(principalSJB.getState()+"-"+principalSJB.isAlive());
+               principalSJB.start();
+               System.out.println(principalSJB.getState()+"-"+principalSJB.isAlive());
+               
+                principalRR = new Thread(new HiloRR());
+               System.out.println(principalRR.getState()+"-"+principalRR.isAlive());
+               principalRR.start();
+               System.out.println(principalRR.getState()+"-"+principalRR.isAlive());
             }
-        } catch (IllegalThreadStateException e) {
-        }
-        
+
+        }catch(IllegalThreadStateException e){}
         
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -205,43 +227,137 @@ public class InterfazTotal2 extends javax.swing.JFrame {
             }
         });
     }//GEN-LAST:event_jButton3ActionPerformed
-//corrigeme :'v 
+
     private class HiloFCFS implements Runnable{
         public void run(){
             try{
+                
                 while(listaDeProcesosFCFS.getListaProceso().size()>=1){
-                for(Proceso proc : listaDeProcesosFCFS.getListaProceso()){
-                    if(proc.getEstado().equals("Listo")){
-                        proc.setEstado("Ejecutando");
-                        tablasEnEjecucion.actualizarFCFS(listaDeProcesosFCFS);
-                        tablasEnEjecucion.actualizarSJB(listaDeProcesosSJB);
-                        tablasEnEjecucion.actualizarRR(listaDeProcesosRR);
-                         try {
-                             for(int i = 0; i<proc.getTiempoEjecucion();i++){
-                                 Thread.sleep(500);
-                                 proc.setTiempoFaltane(proc.getTiempoFaltane()-1);
+                        for(Proceso proc : listaDeProcesosFCFS.getListaProceso()){
+                            if(proc.getEstado().equals("Listo")){
+                                proc.setEstado("Ejecutando");
                                 tablasEnEjecucion.actualizarFCFS(listaDeProcesosFCFS);
-                                tablasEnEjecucion.actualizarSJB(listaDeProcesosSJB);
-                                tablasEnEjecucion.actualizarRR(listaDeProcesosRR);
-                                 
-                             }
-                         } catch (InterruptedException e) {
-                         }finally{
-                            proc.setEstado("Terminado");
-                            System.out.println("Terminado");
-                            tablasEnEjecucion.actualizarFCFS(listaDeProcesosFCFS);
-                            tablasEnEjecucion.actualizarSJB(listaDeProcesosSJB);
-                            tablasEnEjecucion.actualizarRR(listaDeProcesosRR);
-                            break;
-                         }
-                    }
-                }
+                                 try {
+                                     double total =proc.getTiempoFaltane();
+                                     for(int i = 0; i<total;i++){
+                                         try {
+                                             Thread.sleep(500);
+                                         } catch (InterruptedException ex) {
+                                        Logger.getLogger(InterfazTotal2.class.getName()).log(Level.SEVERE, null, ex);
+                                         }
+                                         proc.setTiempoFaltane(proc.getTiempoFaltane()-1);
+                                        tablasEnEjecucion.actualizarFCFS(listaDeProcesosFCFS);
+                                        
+                                     }
+                                 }finally{
+                                    proc.setEstado("Terminado");
+                                    System.out.println("Terminado");
+                                    tablasEnEjecucion.actualizarFCFS(listaDeProcesosFCFS);   
+                                }
+                                break;
+                            }
+                        }
                 }
             }catch(NullPointerException e){}
         }
     }
  
+    private class HiloSJB implements Runnable{
+        public void run(){
+            try{
+                
+                while(listaDeProcesosSJB.getListaProceso().size()>=1){
+                        for(Proceso proc : listaDeProcesosSJB.getListaProceso()){
+                            if(proc.getEstado().equals("Listo") ){
+                                proc.setEstado("Ejecutando");
+                                tablasEnEjecucion.actualizarSJB(listaDeProcesosSJB);
+                                     double total =proc.getTiempoFaltane();
+                                     for(int i = 0; i<total;i++){
+                                         try {
+                                             Thread.sleep(500);
+                                         } catch (InterruptedException ex) {
+                                        Logger.getLogger(InterfazTotal2.class.getName()).log(Level.SEVERE, null, ex);
+                                         }
+                                        proc.setTiempoFaltane(proc.getTiempoFaltane()-1);
+                                        tablasEnEjecucion.actualizarSJB(listaDeProcesosSJB);
+                                    } 
+                                     if(proc.getTiempoFaltane()==0d){
+                                        proc.setEstado("Terminado");
+                                       System.out.println("Terminado");
+                                        
+                                     }else{
+                                         if(proc.getTiempoEjecucion()!=proc.getTiempoFaltane()){
+                                            proc.setEstado("Bloqueado");
+                                           System.out.println(proc.getTiempoFaltane()+"BLOQUEADO");
+                                            
+                                         }
+                                     } 
+                                     algoritmoSJB.ordenarProceso(listaDeProcesosSJB);
+                                     tablasEnEjecucion.actualizarSJB(listaDeProcesosSJB);  
+                                break;
+                            }
+                        }
+                    algoritmoSJB.ordenarProceso(listaDeProcesosSJB);
+                    tablasEnEjecucion.actualizarSJB(listaDeProcesosSJB);  
+                }
+            }catch(NullPointerException e){}
+        }
+    }
  
+    private class HiloRR implements Runnable{
+        public void run(){
+            try{
+                while(listaDeProcesosRR.getListaProceso().size()>=1){
+                    boolean sigue=true;
+                    while(sigue){
+                        for(Proceso proc : listaDeProcesosRR.getListaProceso()){
+                            if(proc.getTiempoFaltane()!=0){
+                                proc.setEstado("Listo");
+                            }
+                        }
+                        for(Proceso proc : listaDeProcesosRR.getListaProceso()){
+                            if(proc.getEstado().equals("Listo") ){
+                                proc.setEstado("Ejecutando");
+                                tablasEnEjecucion.actualizarRR(listaDeProcesosRR);
+                                     for(int i = 0; i<3;i++){
+                                         if(proc.getTiempoFaltane()!=0){
+                                            try {
+                                                Thread.sleep(500);
+                                            } catch (InterruptedException ex) {
+                                           Logger.getLogger(InterfazTotal2.class.getName()).log(Level.SEVERE, null, ex);
+                                            }
+                                           proc.setTiempoFaltane(proc.getTiempoFaltane()-1);
+                                           tablasEnEjecucion.actualizarRR(listaDeProcesosRR);
+                                         }
+                                    } 
+                                     if(proc.getTiempoFaltane()==0d){
+                                        proc.setEstado("Terminado");
+                                       System.out.println("Terminado");
+                                        
+                                     }else{
+                                         if(!Objects.equals(proc.getTiempoFaltane(), proc.getTiempoEjecucion())){
+                                            proc.setEstado("Bloqueado");
+                                           System.out.println(proc.getTiempoFaltane()+"BLOQUEADO");
+                                            
+                                         }
+                                     } 
+                                break;
+                            }
+                        }
+                        for(Proceso p : listaDeProcesosFCFS.getListaProceso()){
+                            if(p.getTiempoFaltane()!=0) {
+                                sigue=true;
+                                break;
+                            }else{
+                                sigue=false;
+                            }
+                        }
+                        
+                    }
+                }
+            }catch(NullPointerException e){}
+        }
+    }    
     /**
      * @param args the command line arguments
      */
@@ -275,6 +391,7 @@ public class InterfazTotal2 extends javax.swing.JFrame {
                 new InterfazTotal2().setVisible(true);
             }
         });
+        
         
     }
 
