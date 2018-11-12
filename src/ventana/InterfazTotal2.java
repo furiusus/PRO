@@ -62,8 +62,10 @@ public class InterfazTotal2 extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("SISTEMAS_OPERATIVOS");
 
         jLabel1.setText("Sistemas Operativos");
 
@@ -96,6 +98,13 @@ public class InterfazTotal2 extends javax.swing.JFrame {
             }
         });
 
+        jButton4.setText("Matar Proceso");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -114,10 +123,12 @@ public class InterfazTotal2 extends javax.swing.JFrame {
                         .addComponent(jButton2)
                         .addGap(38, 38, 38)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jButton1)
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(6, 6, 6)
-                                .addComponent(jButton3))
-                            .addComponent(jButton1))))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jButton4)
+                                    .addComponent(jButton3))))))
                 .addContainerGap(13, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -133,7 +144,9 @@ public class InterfazTotal2 extends javax.swing.JFrame {
                     .addComponent(jButton2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton3)
-                .addContainerGap(269, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 215, Short.MAX_VALUE)
+                .addComponent(jButton4)
+                .addGap(23, 23, 23))
         );
 
         pack();
@@ -141,7 +154,6 @@ public class InterfazTotal2 extends javax.swing.JFrame {
 
     private void inputTiempoEjecucionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputTiempoEjecucionActionPerformed
         // TODO add your handling code here:
-
     }//GEN-LAST:event_inputTiempoEjecucionActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -195,7 +207,9 @@ public class InterfazTotal2 extends javax.swing.JFrame {
             boolean a = !principalFCFS.isAlive()||principalFCFS.getState().equals(Thread.State.TERMINATED);
             boolean b = !principalSJB.isAlive()||principalSJB.getState().equals(Thread.State.TERMINATED);
             boolean c = !principalRR.isAlive()||principalRR.getState().equals(Thread.State.TERMINATED);
-            if((a)&&(b)&&(c)){
+            boolean d = !principalFCFS.isAlive() && !principalSJB.isAlive() && !principalRR.isAlive();
+            boolean e = principalFCFS.getState().equals(Thread.State.TERMINATED) && principalSJB.getState().equals(Thread.State.TERMINATED)&&principalRR.getState().equals(Thread.State.TERMINATED);
+            if(a&&b){
                principalFCFS = new Thread(new HiloFCFS());
                System.out.println(principalFCFS.getState()+"-"+principalFCFS.isAlive());
                principalFCFS.start();
@@ -207,6 +221,9 @@ public class InterfazTotal2 extends javax.swing.JFrame {
                principalSJB.start();
                System.out.println(principalSJB.getState()+"-"+principalSJB.isAlive());
                
+
+            }
+            if(c){
                 principalRR = new Thread(new HiloRR());
                System.out.println(principalRR.getState()+"-"+principalRR.isAlive());
                principalRR.start();
@@ -227,6 +244,10 @@ public class InterfazTotal2 extends javax.swing.JFrame {
             }
         });
     }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton4ActionPerformed
 
     private class HiloFCFS implements Runnable{
         public void run(){
@@ -298,7 +319,7 @@ public class InterfazTotal2 extends javax.swing.JFrame {
                             }
                         }
                     algoritmoSJB.ordenarProceso(listaDeProcesosSJB);
-                    tablasEnEjecucion.actualizarSJB(listaDeProcesosSJB);  
+                     
                 }
             }catch(NullPointerException e){}
         }
@@ -307,53 +328,44 @@ public class InterfazTotal2 extends javax.swing.JFrame {
     private class HiloRR implements Runnable{
         public void run(){
             try{
-                while(listaDeProcesosRR.getListaProceso().size()>=1){
-                    boolean sigue=true;
-                    while(sigue){
-                        for(Proceso proc : listaDeProcesosRR.getListaProceso()){
-                            if(proc.getTiempoFaltane()!=0){
-                                proc.setEstado("Listo");
-                            }
-                        }
+                while(listaDeProcesosRR.getListaProceso().size()>=0){
                         for(Proceso proc : listaDeProcesosRR.getListaProceso()){
                             if(proc.getEstado().equals("Listo") ){
                                 proc.setEstado("Ejecutando");
                                 tablasEnEjecucion.actualizarRR(listaDeProcesosRR);
-                                     for(int i = 0; i<3;i++){
+                                    for(int i = 0; i<3;i++){
                                          if(proc.getTiempoFaltane()!=0){
                                             try {
                                                 Thread.sleep(500);
                                             } catch (InterruptedException ex) {
-                                           Logger.getLogger(InterfazTotal2.class.getName()).log(Level.SEVERE, null, ex);
+                                                Logger.getLogger(InterfazTotal2.class.getName()).log(Level.SEVERE, null, ex);
                                             }
-                                           proc.setTiempoFaltane(proc.getTiempoFaltane()-1);
-                                           tablasEnEjecucion.actualizarRR(listaDeProcesosRR);
-                                         }
+                                            proc.setTiempoFaltane(proc.getTiempoFaltane()-1);
+                                            tablasEnEjecucion.actualizarRR(listaDeProcesosRR);
+                                        }
                                     } 
-                                     if(proc.getTiempoFaltane()==0d){
+                                    if(proc.getTiempoFaltane()==0d){
                                         proc.setEstado("Terminado");
-                                       System.out.println("Terminado");
-                                        
-                                     }else{
-                                         if(!Objects.equals(proc.getTiempoFaltane(), proc.getTiempoEjecucion())){
+                                        System.out.println("Terminado");                           
+                                    }else{
+                                        if(!Objects.equals(proc.getTiempoFaltane(), proc.getTiempoEjecucion())){
                                             proc.setEstado("Bloqueado");
-                                           System.out.println(proc.getTiempoFaltane()+"BLOQUEADO");
-                                            
-                                         }
-                                     } 
-                                break;
+                                            System.out.println(proc.getTiempoFaltane()+"BLOQUEADO");
+                                        }
+                                    }
+                                    if(proc.getOrdenEjecucion().equals(listaDeProcesosRR.getListaProceso().size()-1)){
+                                        for(Proceso p : listaDeProcesosRR.getListaProceso()){
+                                            if(p.getEstado().equals("Bloqueado"))p.setEstado("Listo");
+                                        }
+                                    }
+                                    break;                                     
                             }
+                            if(proc.getOrdenEjecucion().equals(listaDeProcesosRR.getListaProceso().size()-1)){
+                                        for(Proceso p : listaDeProcesosRR.getListaProceso()){
+                                            if(p.getEstado().equals("Bloqueado"))p.setEstado("Listo");
+                                        }
+                                    }
                         }
-                        for(Proceso p : listaDeProcesosFCFS.getListaProceso()){
-                            if(p.getTiempoFaltane()!=0) {
-                                sigue=true;
-                                break;
-                            }else{
-                                sigue=false;
-                            }
-                        }
-                        
-                    }
                 }
             }catch(NullPointerException e){}
         }
@@ -400,6 +412,7 @@ public class InterfazTotal2 extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     // End of variables declaration//GEN-END:variables
