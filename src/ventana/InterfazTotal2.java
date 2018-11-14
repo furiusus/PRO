@@ -8,11 +8,13 @@ package ventana;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.Objects;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ventana.entidades.AlgoritmoFcfs;
 import ventana.entidades.AlgoritmoRR;
 import ventana.entidades.AlgoritmoSJB;
+import ventana.entidades.Interrupciones;
 import ventana.entidades.ListaProceso;
 import ventana.entidades.Proceso;
 
@@ -25,6 +27,7 @@ public class InterfazTotal2 extends javax.swing.JFrame {
     private final ListaProceso listaDeProcesosFCFS = new ListaProceso();
     private final ListaProceso listaDeProcesosRR = new ListaProceso();
     private final ListaProceso listaDeProcesosSJB = new ListaProceso();
+    private final ListaProceso listaProceso = new ListaProceso();
     AlgoritmoFcfs algoritmoFcfs = new AlgoritmoFcfs();
     AlgoritmoSJB algoritmoSJB = new AlgoritmoSJB();
     AlgoritmoRR algoritmoRR = new AlgoritmoRR();
@@ -33,7 +36,9 @@ public class InterfazTotal2 extends javax.swing.JFrame {
     public Thread principalFCFS=new Thread(new HiloFCFS()); 
     public Thread principalSJB=new Thread(new HiloSJB());
     public Thread principalRR=new Thread(new HiloRR());
-    private boolean anhadio = false;
+    private final Interrupciones interrupciones = new Interrupciones();
+    private final Random random = new Random();
+    
 
     
     /**
@@ -178,6 +183,8 @@ public class InterfazTotal2 extends javax.swing.JFrame {
         nuevoProceso.setTiempoEjecucion(Double.parseDouble(inputTiempoEjecucion.getText()));
         nuevoProceso.setTamanioProceso(0d);
         nuevoProceso.setTiempoFaltane(Double.parseDouble(inputTiempoEjecucion.getText()));
+        nuevoProceso.setListaHijos(new ArrayList<>());
+        nuevoProceso.setPidHijo(0);
         
         
         cantidadProcesos = algoritmoFcfs.obtenerCantidad(listaDeProcesosFCFS);
@@ -185,6 +192,7 @@ public class InterfazTotal2 extends javax.swing.JFrame {
         nuevoProceso.setOrdenEjecucion(cantidadProcesos);
         Proceso nuevoProceso1 =new Proceso(nuevoProceso);
         algoritmoFcfs.anadirProceso(nuevoProceso1,listaDeProcesosFCFS);
+        listaProceso.setListaProceso(listaDeProcesosFCFS.getListaProceso());
         
         
         cantidadProcesos = algoritmoSJB.obtenerCantidad(listaDeProcesosSJB);
@@ -201,6 +209,7 @@ public class InterfazTotal2 extends javax.swing.JFrame {
         algoritmoRR.anadirProceso(nuevoProceso3,listaDeProcesosRR);
         
         algoritmoSJB.ordenarProceso(listaDeProcesosSJB);
+        tablaProceso.actualizar(listaProceso);
 
         inputTiempoEjecucion.setText(null);
         try{
@@ -252,8 +261,8 @@ public class InterfazTotal2 extends javax.swing.JFrame {
     private class HiloFCFS implements Runnable{
         public void run(){
             try{
-                
                 while(listaDeProcesosFCFS.getListaProceso().size()>=1){
+                    
                         for(Proceso proc : listaDeProcesosFCFS.getListaProceso()){
                             if(proc.getEstado().equals("Listo")){
                                 proc.setEstado("Ejecutando");
@@ -268,7 +277,9 @@ public class InterfazTotal2 extends javax.swing.JFrame {
                                          }
                                          proc.setTiempoFaltane(proc.getTiempoFaltane()-1);
                                         tablasEnEjecucion.actualizarFCFS(listaDeProcesosFCFS);
-                                        
+                                        int probabilidad = random.nextInt(100)+1;
+                                        System.out.println("Probabilidad: "+probabilidad);
+                                        //interrupciones.resultado(probabilidad,proc);
                                      }
                                  }finally{
                                     proc.setEstado("Terminado");
@@ -307,7 +318,7 @@ public class InterfazTotal2 extends javax.swing.JFrame {
                                        System.out.println("Terminado");
                                         
                                      }else{
-                                         if(proc.getTiempoEjecucion()!=proc.getTiempoFaltane()){
+                                         if(!Objects.equals(proc.getTiempoEjecucion(), proc.getTiempoFaltane())){
                                             proc.setEstado("Bloqueado");
                                            System.out.println(proc.getTiempoFaltane()+"BLOQUEADO");
                                             
@@ -342,6 +353,7 @@ public class InterfazTotal2 extends javax.swing.JFrame {
                                             }
                                             proc.setTiempoFaltane(proc.getTiempoFaltane()-1);
                                             tablasEnEjecucion.actualizarRR(listaDeProcesosRR);
+                                            
                                         }
                                     } 
                                     if(proc.getTiempoFaltane()==0d){
@@ -356,6 +368,7 @@ public class InterfazTotal2 extends javax.swing.JFrame {
                                     if(proc.getOrdenEjecucion().equals(listaDeProcesosRR.getListaProceso().size()-1)){
                                         for(Proceso p : listaDeProcesosRR.getListaProceso()){
                                             if(p.getEstado().equals("Bloqueado"))p.setEstado("Listo");
+                                            
                                         }
                                     }
                                     break;                                     
@@ -363,6 +376,7 @@ public class InterfazTotal2 extends javax.swing.JFrame {
                             if(proc.getOrdenEjecucion().equals(listaDeProcesosRR.getListaProceso().size()-1)){
                                         for(Proceso p : listaDeProcesosRR.getListaProceso()){
                                             if(p.getEstado().equals("Bloqueado"))p.setEstado("Listo");
+                                            
                                         }
                                     }
                         }

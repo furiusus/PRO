@@ -24,33 +24,35 @@ public class TablaProceso extends javax.swing.JFrame {
     public TablaProceso() {
         initComponents();
     }
-    
-    public void cargarListas(ListaProceso l1,ListaProceso l2){
-        for(Proceso p:l1.getListaProceso()){
-            l2.getListaProceso().add(p);
+       public void cargarListas(ListaProceso l1,ListaProceso l2){
+        try {
+            l2.setListaProceso(new ArrayList<>());
+            for(Proceso p:l1.getListaProceso()){
+                l2.getListaProceso().add(p);
+            }
+        } catch (Exception e) {
         }
+        
     }
-        public void cargarListaEnTabla(ListaProceso l,JTable tabla){
+    
+    public void cargarListaEnTabla(ListaProceso l,JTable tabla){
         DefaultTableModel modelo = (DefaultTableModel) tabla.getModel();
-        Object[] dato = new Object[4];
-        for (Proceso p : l.getListaProceso()) {
-            dato[0]=String.valueOf(p.getOrdenEjecucion());
-            dato[1]=String.valueOf(p.getPid());
-            dato[2]=String.valueOf(p.getTiempoFaltane());
-            dato[3]=String.valueOf(p.getEstado());
-            modelo.addRow(dato);
+        Object[] dato = new Object[3];
+        for(Proceso p : l.getListaProceso()){
+            if(true){
+                dato[0]=String.valueOf(p.getPid());
+                dato[1]=String.valueOf(p.getTiempoEjecucion());
+                
+                modelo.addRow(dato);
+            }
         }
         tabla.setModel(modelo);
     }
-        
     public void actualizar(ListaProceso list1){
-        listaProceso.setListaProceso(new ArrayList<>());
-        cargarListas(list1,listaProceso);
         borrarTablas(outputTablaProceso);
-        cargarListaEnTabla(listaProceso,outputTablaProceso);
+        cargarListaEnTabla(list1, outputTablaProceso);   
     }
-    
-    public void borrarTablas(JTable tabla){
+   public void borrarTablas(JTable tabla){
         DefaultTableModel modelo = (DefaultTableModel) tabla.getModel();
         while(modelo.getRowCount()>0)modelo.removeRow(0);
     }
@@ -68,6 +70,7 @@ public class TablaProceso extends javax.swing.JFrame {
         outputTablaProceso = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setLocation(new java.awt.Point(1200, 250));
 
         jButton1.setText("cerrar");
         jButton1.addActionListener(new java.awt.event.ActionListener() {

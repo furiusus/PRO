@@ -5,6 +5,7 @@
  */
 package ventana.entidades;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -12,37 +13,31 @@ import java.util.Random;
  * @author furiusus
  */
 public class Interrupciones {
-    private Integer idInterrupcion;
-    private String nombreInterrupcion;
-
-    public Integer getIdInterrupcion() {
-        return idInterrupcion;
-    }
-
-    public void setIdInterrupcion(Integer idInterrupcion) {
-        this.idInterrupcion = idInterrupcion;
-    }
-
-    public String getNombreInterrupcion() {
-        return nombreInterrupcion;
-    }
-
-    public void setNombreInterrupcion(String nombreInterrupcion) {
-        this.nombreInterrupcion = nombreInterrupcion;
-    }
     
-    public void crearProcesoHijo(){
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
+    
+    public void resultado(int prob,Proceso proceso){
+        if(prob>0){
+            if(prob<8){
+                proceso.setEstado("Bloqueado");
+                Proceso procesoObj = new Proceso();
+                System.out.println("Creacion de hijos");
+                int orden = proceso.getListaHijos().size();
+                procesoObj.setOrdenEjecucion(orden);
+                procesoObj.setPid(proceso.getPid());
+                procesoObj.setPidHijo(orden);
+                procesoObj.setEstado("Listo");
+                double tiempoEjecucion = prob*400;
+                procesoObj.setTiempoEjecucion(tiempoEjecucion);
+                procesoObj.setTiempoFaltane(tiempoEjecucion);
+                procesoObj.setListaHijos(new ArrayList<>());
+                proceso.getListaHijos().add(procesoObj);
+            }
+            if(prob<16 && prob>=8){
+                System.out.println("Creacion de interrupcion de I/O");
+            }
+            if(prob<20 && prob >=16){
+                   System.out.println("El proceso se para completamente por error");
+            }
         }
     }
-    public void crearInterrupcionIO(){
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-        }
-    }
-
-        
 }

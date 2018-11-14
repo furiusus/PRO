@@ -5,6 +5,8 @@
  */
 package ventana.entidades;
 
+import java.util.List;
+
 /**
  *
  * @author furiusus
@@ -16,6 +18,9 @@ public class Proceso {
     private Double tiempoFaltane;
     private Integer ordenEjecucion;
     private String estado;
+    private List<Proceso> listaHijos;
+    private Integer pidHijo;
+    
     
     public Proceso() {
         
@@ -27,6 +32,14 @@ public class Proceso {
         this.tiempoFaltane=proc.getTiempoFaltane();
         this.ordenEjecucion=proc.getOrdenEjecucion();
         this.estado=proc.getEstado();
+    }
+
+    public List<Proceso> getListaHijos() {
+        return listaHijos;
+    }
+
+    public void setListaHijos(List<Proceso> listaHijos) {
+        this.listaHijos = listaHijos;
     }
     
     public String getEstado() {
@@ -54,8 +67,13 @@ public class Proceso {
         this.tiempoFaltane = tiempoFaltane;
     }
 
+    public Integer getPidHijo() {
+        return pidHijo;
+    }
 
-    
+    public void setPidHijo(Integer pidHijo) {
+        this.pidHijo = pidHijo;
+    }
 
     public Integer getPid() {
         return pid;
@@ -86,9 +104,9 @@ public class Proceso {
         this.tamanioProceso=proc.getTamanioProceso();
         this.tiempoEjecucion=proc.getTiempoEjecucion();
         this.tiempoFaltane=proc.getTiempoFaltane();
-        
         this.estado=proc.getEstado();
+        this.pidHijo=proc.pidHijo;
     }
-    
+
     
 }
